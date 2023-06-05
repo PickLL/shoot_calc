@@ -18,10 +18,10 @@ fn main() {
 impl eframe::App for CalcApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ctx.set_pixels_per_point(4.0);
+            ctx.set_pixels_per_point(2.0);
 
             egui::ComboBox::from_label("Shoot Type")
-                .selected_text(&self.shoot_type.to_string())
+                .selected_text(self.shoot_type.to_string())
                 .show_ui(ui, |ui| {
                     ui.selectable_value(
                         &mut self.shoot_type,
@@ -126,7 +126,7 @@ fn ui_hourly(
     photographer: &mut Photographer,
 ) {
     egui::ComboBox::from_label("Photographer")
-        .selected_text(&photographer.to_string())
+        .selected_text(photographer.to_string())
         .show_ui(ui, |ui| {
             ui.selectable_value(photographer, Photographer::Ken, "Ken");
             ui.selectable_value(photographer, Photographer::Colin, "Colin");
@@ -161,7 +161,7 @@ fn ui_half_day_based(
     photographer: &mut Photographer,
 ) {
     egui::ComboBox::from_label("Photographer")
-        .selected_text(&photographer.to_string())
+        .selected_text(photographer.to_string())
         .show_ui(ui, |ui| {
             ui.selectable_value(photographer, Photographer::Ken, "Ken");
             ui.selectable_value(photographer, Photographer::Colin, "Colin");
@@ -194,7 +194,7 @@ fn ui_headshot(
     photographer: &mut Photographer,
 ) {
     egui::ComboBox::from_label("Photographer")
-        .selected_text(&photographer.to_string())
+        .selected_text(photographer.to_string())
         .show_ui(ui, |ui| {
             ui.selectable_value(photographer, Photographer::Ken, "Ken");
             ui.selectable_value(photographer, Photographer::Colin, "Colin");
@@ -244,7 +244,7 @@ fn ui_new_headshot(
     editing: &mut bool,
 ) {
     egui::ComboBox::from_label("Headshot type")
-        .selected_text(&headshot_type.to_string())
+        .selected_text(headshot_type.to_string())
         .show_ui(ui, |ui| {
             ui.selectable_value(headshot_type, HeadshotType::Large, "Large");
             ui.selectable_value(headshot_type, HeadshotType::Team, "Team");

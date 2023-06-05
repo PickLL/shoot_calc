@@ -78,13 +78,13 @@ impl CalcApp {
     ) -> f32 {
         (photographer.get_hourly() * hours)
             + if image_prep {
-                IMAGE_PREP_PRICE as f32
+                IMAGE_PREP_PRICE
             } else {
                 0.0
             }
-            + if self.drone { DRONE_PRICE as f32 } else { 0.0 }
-            + assistant_hours as f32 * ASSISTANT_PRICE as f32
-            + self.expenses as f32 * EXPENSES_PRICE as f32
+            + if self.drone { DRONE_PRICE} else { 0.0 }
+            + assistant_hours * ASSISTANT_PRICE
+            + self.expenses as f32 * EXPENSES_PRICE
     }
 
     fn calc_half_day(
@@ -130,13 +130,13 @@ impl CalcApp {
                         FANCY_RETOUCH_PRICE
                     };
 
-                hourly + per_person as f32 + if editing { ON_SITE_EDITIING_PRICE } else { 0.0 }
+                hourly + per_person + if editing { ON_SITE_EDITIING_PRICE } else { 0.0 }
             }
             HeadshotType::Team => {
                 let hourly = calc_hours(heads) * (TEAM_HEADSHOT_HOURLY + ASSISTANT_PRICE);
                 let per_person = heads as f32 * CHEAP_RETOUCH_PRICE;
 
-                hourly + per_person as f32 + if editing { ON_SITE_EDITIING_PRICE } else { 0.0 }
+                hourly + per_person + if editing { ON_SITE_EDITIING_PRICE } else { 0.0 }
             }
             HeadshotType::Small => {
                 300.0 //wow very fancy system
@@ -209,13 +209,12 @@ impl Display for ShootType {
 
 impl PartialEq for ShootType {
     fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
+        matches!((self, other),
             (ShootType::Hourly { .. }, ShootType::Hourly { .. })
             | (ShootType::Headshot { .. }, ShootType::Headshot { .. })
             | (ShootType::HalfDayBased { .. }, ShootType::HalfDayBased { .. })
-            | (ShootType::NewHeadshot { .. }, ShootType::NewHeadshot { .. }) => true,
-            _ => false,
-        }
+            | (ShootType::NewHeadshot { .. }, ShootType::NewHeadshot { .. })
+        )
     }
 }
 
@@ -287,11 +286,10 @@ impl Display for RetouchLevel {
 
 impl PartialEq for RetouchLevel {
     fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
+        matches!((self, other),
             (RetouchLevel::Volume, RetouchLevel::Volume)
             | (RetouchLevel::Light, RetouchLevel::Light)
-            | (RetouchLevel::Nice, RetouchLevel::Nice) => true,
-            _ => false,
-        }
+            | (RetouchLevel::Nice, RetouchLevel::Nice)
+        )
     }
 }
