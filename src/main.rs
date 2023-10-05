@@ -18,7 +18,7 @@ fn main() {
 impl eframe::App for CalcApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ctx.set_pixels_per_point(2.0);
+            ctx.set_pixels_per_point(4.0);
 
             egui::ComboBox::from_label("Shoot Type")
                 .selected_text(self.shoot_type.to_string())
