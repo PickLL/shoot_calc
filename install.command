@@ -1,4 +1,5 @@
 #!/bin/sh
+git pull origin
 rustup update
 cargo update
 cargo clean
