@@ -16,9 +16,9 @@ fn main() {
 }
 
 impl eframe::App for CalcApp {
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ctx.set_pixels_per_point(4.0);
+            ctx.set_pixels_per_point(frame.info().native_pixels_per_point.unwrap_or(1.0) * 2.0);
 
             egui::ComboBox::from_label("Shoot Type")
                 .selected_text(self.shoot_type.to_string())
@@ -29,6 +29,8 @@ impl eframe::App for CalcApp {
                             hours: 0.0,
                             image_prep: false,
                             assistant_hours: 0.0,
+                            use_higher_prep_price: false,
+                            use_higher_assistant_price: false,
                             photographer: Photographer::Ken,
                         },
                         "Hourly",
@@ -39,6 +41,8 @@ impl eframe::App for CalcApp {
                             halves: 0,
                             image_prep: false,
                             assistant_hours: 0.0,
+                            use_higher_prep_price: false,
+                            use_higher_assistant_price: false,
                             photographer: Photographer::Ken,
                         },
                         "Half Day",
@@ -65,8 +69,10 @@ impl eframe::App for CalcApp {
                     image_prep,
                     assistant_hours,
                     photographer,
+                    use_higher_assistant_price,
+                    use_higher_prep_price,
                 } => {
-                    ui_hourly(ui, hours, image_prep, assistant_hours, photographer);
+                    ui_hourly(ui, hours, image_prep, assistant_hours, photographer, use_higher_prep_price, use_higher_assistant_price);
                 }
 
                 ShootType::Headshot {
@@ -93,8 +99,10 @@ impl eframe::App for CalcApp {
                     image_prep,
                     assistant_hours,
                     photographer,
+                    use_higher_assistant_price,
+                    use_higher_prep_price,
                 } => {
-                    ui_half_day_based(ui, halves, image_prep, assistant_hours, photographer);
+                    ui_half_day_based(ui, halves, image_prep, assistant_hours, photographer, use_higher_prep_price, use_higher_assistant_price);
                 }
 
                 ShootType::NewHeadshot {
@@ -124,6 +132,8 @@ fn ui_hourly(
     image_prep: &mut bool,
     assistant_hours: &mut f32,
     photographer: &mut Photographer,
+    use_higher_prep_price: &mut bool, 
+    use_higher_assistant_price: &mut bool,
 ) {
     egui::ComboBox::from_label("Photographer")
         .selected_text(photographer.to_string())
@@ -148,9 +158,11 @@ fn ui_hourly(
         } else {
             ui.label("assistant hours");
         }
+        ui.checkbox(use_higher_assistant_price, "use higher assistant price")
     });
 
     ui.checkbox(image_prep, "image prep");
+    ui.checkbox(use_higher_prep_price, "use higher image prep price");
 }
 
 fn ui_half_day_based(
@@ -159,6 +171,8 @@ fn ui_half_day_based(
     image_prep: &mut bool,
     assistant_hours: &mut f32,
     photographer: &mut Photographer,
+    use_higher_prep_price: &mut bool, 
+    use_higher_assistant_price: &mut bool,
 ) {
     egui::ComboBox::from_label("Photographer")
         .selected_text(photographer.to_string())
@@ -179,9 +193,11 @@ fn ui_half_day_based(
         } else {
             ui.label("assistant hours");
         }
+        ui.checkbox(use_higher_assistant_price, "use higher assistant price")
     });
 
     ui.checkbox(image_prep, "image prep");
+    ui.checkbox(use_higher_prep_price, "use higher image prep price");
 }
 
 fn ui_headshot(
@@ -279,7 +295,7 @@ for up to {} photo hours (plus one extra hour on site for set-up & teardown)",
                 .on_hover_text("click to copy")
                 .clicked()
             {
-                ui.output_mut(|o| o.copied_text = text.clone());
+                ui.output_mut(|o| o.copied_text = text.to_string());
             };
         }
         HeadshotType::Team => {
@@ -291,7 +307,7 @@ Online sign up & direct email delivery to subjects
 12/people per hour
 for up to 1 photo hour (plus one extra hour on site for set-up & teardown)";
             if ui
-                .add(Label::new(text.clone()).sense(Sense::click()))
+                .add(Label::new(text).sense(Sense::click()))
                 .on_hover_text("click to copy")
                 .clicked()
             {

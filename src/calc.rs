@@ -1,8 +1,13 @@
 use core::fmt::Display;
 
 const IMAGE_PREP_PRICE: f32 = 50.0;
+const HIGHER_IMAGE_PREP_PRICE: f32 = 50.0 * 2.0;
+
 const DRONE_PRICE: f32 = 150.0;
+
 const ASSISTANT_PRICE: f32 = 40.0;
+const HIGHER_ASSISTANT_PRICE: f32 = 50.0;
+
 const EXPENSES_PRICE: f32 = 10.0;
 const ON_SITE_EDITIING_PRICE: f32 = 100.0;
 
@@ -25,6 +30,8 @@ impl CalcApp {
                 hours: 0.0,
                 image_prep: false,
                 assistant_hours: 0.0,
+                use_higher_assistant_price: false,
+                use_higher_prep_price: false,
                 photographer: Photographer::Ken,
             },
             expenses: 0,
@@ -39,13 +46,17 @@ impl CalcApp {
                 image_prep,
                 assistant_hours,
                 photographer,
-            } => self.calc_hourly(*hours, *image_prep, *assistant_hours, photographer),
+                use_higher_prep_price,
+                use_higher_assistant_price,
+            } => self.calc_hourly(*hours, *image_prep, *assistant_hours, photographer, *use_higher_prep_price, *use_higher_assistant_price),
             ShootType::HalfDayBased {
                 halves,
                 image_prep,
                 assistant_hours,
                 photographer,
-            } => self.calc_half_day(*halves, *image_prep, *assistant_hours, photographer),
+                use_higher_prep_price,
+                use_higher_assistant_price,
+            } => self.calc_half_day(*halves, *image_prep, *assistant_hours, photographer, *use_higher_prep_price, *use_higher_assistant_price),
             ShootType::Headshot {
                 hours,
                 people,
@@ -75,15 +86,17 @@ impl CalcApp {
         image_prep: bool,
         assistant_hours: f32,
         photographer: &Photographer,
+        use_higher_prep_price: bool,
+        use_higher_assistant_price: bool,        
     ) -> f32 {
         (photographer.get_hourly() * hours)
             + if image_prep {
-                IMAGE_PREP_PRICE
+                if use_higher_prep_price {HIGHER_IMAGE_PREP_PRICE} else {IMAGE_PREP_PRICE}
             } else {
                 0.0
             }
             + if self.drone { DRONE_PRICE} else { 0.0 }
-            + assistant_hours * ASSISTANT_PRICE
+            + assistant_hours * if use_higher_assistant_price {HIGHER_ASSISTANT_PRICE} else {ASSISTANT_PRICE}
             + self.expenses as f32 * EXPENSES_PRICE
     }
 
@@ -93,12 +106,18 @@ impl CalcApp {
         image_prep: bool,
         assistant_hours: f32,
         photographer: &Photographer,
+        use_higher_prep_price: bool,
+        use_higher_assistant_price: bool,
     ) -> f32 {
         ((halves as f32 / 2.0).ceil() * photographer.get_first_half_day())
             + ((halves as f32 / 2.0).floor() * photographer.get_second_half_day())
-            + if image_prep { IMAGE_PREP_PRICE } else { 0.0 }
+            + if image_prep {
+                if use_higher_prep_price {HIGHER_IMAGE_PREP_PRICE} else {IMAGE_PREP_PRICE}
+            } else {
+                0.0
+            }
             + if self.drone { DRONE_PRICE } else { 0.0 }
-            + assistant_hours * ASSISTANT_PRICE
+            + assistant_hours * if use_higher_assistant_price {HIGHER_ASSISTANT_PRICE} else {ASSISTANT_PRICE}
             + self.expenses as f32 * EXPENSES_PRICE
     }
 
@@ -157,12 +176,16 @@ pub enum ShootType {
         hours: f32,
         image_prep: bool,
         assistant_hours: f32,
+        use_higher_prep_price: bool,
+        use_higher_assistant_price: bool,
         photographer: Photographer,
     },
     HalfDayBased {
         halves: u32,
         image_prep: bool,
         assistant_hours: f32,
+        use_higher_prep_price: bool,
+        use_higher_assistant_price: bool,
         photographer: Photographer,
     },
     Headshot {
