@@ -56,6 +56,11 @@ impl eframe::App for CalcApp {
                         },
                         "Headshot",
                     );
+                    ui.selectable_value(
+                        &mut self.shoot_type,
+                        ShootType::Conference { hours: 0.0 },
+                        "Conference",
+                    );
                 });
             ui.horizontal(|ui| {
                 ui.add(DragValue::new(&mut self.expenses));
@@ -111,6 +116,9 @@ impl eframe::App for CalcApp {
                     editing,
                 } => {
                     ui_new_headshot(ui, heads, headshot_type, editing);
+                }
+                ShootType::Conference { hours } => {
+                    ui_conference(ui, hours)
                 }
             }
             if ui
@@ -321,7 +329,7 @@ simple lighting as needed
 minor retouching included (blemishes)
 fully trained HuthPhoto Team photographer";
             if ui
-                .add(Label::new(text.clone()).sense(Sense::click()))
+                .add(Label::new(text).sense(Sense::click()))
                 .on_hover_text("click to copy")
                 .clicked()
             {
@@ -329,4 +337,18 @@ fully trained HuthPhoto Team photographer";
             };
         }
     }
+}
+
+fn ui_conference(
+    ui: &mut Ui,
+    hours: &mut f32,
+) {
+    ui.horizontal(|ui| {
+        ui.add(DragValue::new(hours));
+        if *hours == 0.0 {
+            ui.label("hour");
+        } else {
+            ui.label("hours");
+        }
+    });
 }

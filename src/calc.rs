@@ -17,6 +17,8 @@ const TEAM_HEADSHOT_HOURLY: f32 = 200.0;
 const CHEAP_RETOUCH_PRICE: f32 = 10.0;
 const FANCY_RETOUCH_PRICE: f32 = 20.0;
 
+const CONFERENCE_HOURLY: f32 = 200.0;
+
 pub struct CalcApp {
     pub shoot_type: ShootType,
     pub expenses: u32,
@@ -77,6 +79,7 @@ impl CalcApp {
                 headshot_type,
                 editing,
             } => self.calc_new_headshot(*heads, headshot_type, *editing),
+            ShootType::Conference { hours } => self.calc_conference(*hours),
         }
     }
 
@@ -165,6 +168,12 @@ impl CalcApp {
             + self.expenses as f32 * EXPENSES_PRICE
             + if self.drone { DRONE_PRICE } else { 0.0 }
     }
+
+    fn calc_conference(&self, hours: f32) -> f32{
+        hours * CONFERENCE_HOURLY
+        + if self.drone { DRONE_PRICE } else { 0.0 }
+        + self.expenses as f32 * EXPENSES_PRICE
+    }
 }
 
 pub fn calc_hours(heads: u32) -> f32 {
@@ -201,6 +210,9 @@ pub enum ShootType {
         headshot_type: HeadshotType,
         editing: bool,
     },
+    Conference{
+        hours: f32,
+    }
 }
 #[derive(PartialEq)]
 pub enum HeadshotType {
@@ -226,6 +238,7 @@ impl Display for ShootType {
             ShootType::HalfDayBased { .. } => write!(f, "Half Day"),
             ShootType::Headshot { .. } => write!(f, "Headshot"),
             ShootType::NewHeadshot { .. } => write!(f, "Headshot"),
+            ShootType::Conference { .. } => write!(f, "Conference"),
         }
     }
 }
@@ -262,21 +275,21 @@ impl Photographer {
     fn get_hourly(&self) -> f32 {
         match self {
             Photographer::Ken => 275.0,
-            Photographer::Colin => 200.0,
+            Photographer::Colin => 225.0,
             Photographer::Team => 150.0,
         }
     }
     fn get_first_half_day(&self) -> f32 {
         match self {
             Photographer::Ken => 1500.0,
-            Photographer::Colin => 1000.0,
+            Photographer::Colin => 1500.0,
             Photographer::Team => 600.0,
         }
     }
     fn get_second_half_day(&self) -> f32 {
         match self {
             Photographer::Ken => 1000.0,
-            Photographer::Colin => 800.0,
+            Photographer::Colin => 1000.0,
             Photographer::Team => 600.0,
         }
     }
