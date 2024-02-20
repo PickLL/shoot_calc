@@ -49,7 +49,7 @@ impl eframe::App for CalcApp {
                     );
                     ui.selectable_value(
                         &mut self.shoot_type,
-                        ShootType::NewHeadshot {
+                        ShootType::Headshot {
                             heads: 0,
                             headshot_type: HeadshotType::Large,
                             editing: false,
@@ -80,25 +80,6 @@ impl eframe::App for CalcApp {
                     ui_hourly(ui, hours, image_prep, assistant_hours, photographer, use_higher_prep_price, use_higher_assistant_price);
                 }
 
-                ShootType::Headshot {
-                    hours,
-                    people,
-                    editing,
-                    retouch,
-                    assistant_hours,
-                    photographer,
-                } => {
-                    ui_headshot(
-                        ui,
-                        hours,
-                        people,
-                        editing,
-                        retouch,
-                        assistant_hours,
-                        photographer,
-                    );
-                }
-
                 ShootType::HalfDayBased {
                     halves,
                     image_prep,
@@ -110,12 +91,12 @@ impl eframe::App for CalcApp {
                     ui_half_day_based(ui, halves, image_prep, assistant_hours, photographer, use_higher_prep_price, use_higher_assistant_price);
                 }
 
-                ShootType::NewHeadshot {
+                ShootType::Headshot {
                     heads,
                     headshot_type,
                     editing,
                 } => {
-                    ui_new_headshot(ui, heads, headshot_type, editing);
+                    ui_headshot(ui, heads, headshot_type, editing);
                 }
                 ShootType::Conference { hours } => {
                     ui_conference(ui, hours)
@@ -209,59 +190,6 @@ fn ui_half_day_based(
 }
 
 fn ui_headshot(
-    ui: &mut Ui,
-    hours: &mut f32,
-    people: &mut u32,
-    editing: &mut bool,
-    retouch: &mut RetouchLevel,
-    assistant_hours: &mut f32,
-    photographer: &mut Photographer,
-) {
-    egui::ComboBox::from_label("Photographer")
-        .selected_text(photographer.to_string())
-        .show_ui(ui, |ui| {
-            ui.selectable_value(photographer, Photographer::Ken, "Ken");
-            ui.selectable_value(photographer, Photographer::Colin, "Colin");
-            ui.selectable_value(photographer, Photographer::Team, "Team");
-        });
-    ui.horizontal(|ui| {
-        ui.add(DragValue::new(hours));
-        if *hours == 1.0 {
-            ui.label("hour");
-        } else {
-            ui.label("hours");
-        }
-    });
-    ui.horizontal(|ui| {
-        ui.add(DragValue::new(assistant_hours));
-        if *assistant_hours == 1.0 {
-            ui.label("assistant hour");
-        } else {
-            ui.label("assistant hours");
-        }
-    });
-
-    ui.horizontal(|ui| {
-        ui.add(DragValue::new(people));
-        if *hours == 1.0 {
-            ui.label("person");
-        } else {
-            ui.label("people");
-        }
-    });
-
-    egui::ComboBox::from_label("Retouching Type")
-        .selected_text(retouch.to_string())
-        .show_ui(ui, |ui| {
-            ui.selectable_value(retouch, RetouchLevel::Volume, "Volume");
-            ui.selectable_value(retouch, RetouchLevel::Light, "Light");
-            ui.selectable_value(retouch, RetouchLevel::Nice, "Nice");
-        });
-
-    ui.checkbox(editing, "editing");
-}
-
-fn ui_new_headshot(
     ui: &mut Ui,
     heads: &mut u32,
     headshot_type: &mut HeadshotType,

@@ -60,25 +60,10 @@ impl CalcApp {
                 use_higher_assistant_price,
             } => self.calc_half_day(*halves, *image_prep, *assistant_hours, photographer, *use_higher_prep_price, *use_higher_assistant_price),
             ShootType::Headshot {
-                hours,
-                people,
-                editing,
-                retouch,
-                assistant_hours,
-                photographer,
-            } => self.calc_headshot(
-                *hours,
-                *people,
-                *editing,
-                retouch,
-                *assistant_hours,
-                photographer,
-            ),
-            ShootType::NewHeadshot {
                 heads,
                 headshot_type,
                 editing,
-            } => self.calc_new_headshot(*heads, headshot_type, *editing),
+            } => self.calc_headshot(*heads, headshot_type, *editing),
             ShootType::Conference { hours } => self.calc_conference(*hours),
         }
     }
@@ -124,24 +109,7 @@ impl CalcApp {
             + self.expenses as f32 * EXPENSES_PRICE
     }
 
-    fn calc_headshot(
-        &self,
-        hours: f32,
-        people: u32,
-        editing: bool,
-        retouch_level: &RetouchLevel,
-        assistant_hours: f32,
-        photographer: &Photographer,
-    ) -> f32 {
-        (photographer.get_hourly() * hours)
-            + if self.drone { DRONE_PRICE } else { 0.0 }
-            + assistant_hours * ASSISTANT_PRICE
-            + self.expenses as f32 * EXPENSES_PRICE
-            + people as f32 * retouch_level.get_price_per()
-            + if editing { ON_SITE_EDITIING_PRICE } else { 0.0 }
-    }
-
-    fn calc_new_headshot(&self, heads: u32, headshot_type: &HeadshotType, editing: bool) -> f32 {
+    fn calc_headshot(&self, heads: u32, headshot_type: &HeadshotType, editing: bool) -> f32 {
         let main_price = match headshot_type {
             HeadshotType::Large => {
                 let hourly = calc_hours(heads) * (LARGE_HEADSHOT_HOURLY + (ASSISTANT_PRICE * 2.0));
@@ -198,14 +166,6 @@ pub enum ShootType {
         photographer: Photographer,
     },
     Headshot {
-        hours: f32,
-        people: u32,
-        editing: bool,
-        retouch: RetouchLevel,
-        assistant_hours: f32,
-        photographer: Photographer,
-    },
-    NewHeadshot {
         heads: u32,
         headshot_type: HeadshotType,
         editing: bool,
@@ -237,7 +197,6 @@ impl Display for ShootType {
             ShootType::Hourly { .. } => write!(f, "Hourly"),
             ShootType::HalfDayBased { .. } => write!(f, "Half Day"),
             ShootType::Headshot { .. } => write!(f, "Headshot"),
-            ShootType::NewHeadshot { .. } => write!(f, "Headshot"),
             ShootType::Conference { .. } => write!(f, "Conference"),
         }
     }
@@ -247,9 +206,8 @@ impl PartialEq for ShootType {
     fn eq(&self, other: &Self) -> bool {
         matches!((self, other),
             (ShootType::Hourly { .. }, ShootType::Hourly { .. })
-            | (ShootType::Headshot { .. }, ShootType::Headshot { .. })
             | (ShootType::HalfDayBased { .. }, ShootType::HalfDayBased { .. })
-            | (ShootType::NewHeadshot { .. }, ShootType::NewHeadshot { .. })
+            | (ShootType::Headshot { .. }, ShootType::Headshot { .. })
         )
     }
 }
