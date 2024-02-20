@@ -53,6 +53,9 @@ impl eframe::App for CalcApp {
                             heads: 0,
                             headshot_type: HeadshotType::Large,
                             editing: false,
+                            retouch_level: RetouchLevel::Discount,
+                            extra_retouched_photos: 0,
+                            days: 1,
                         },
                         "Headshot",
                     );
@@ -95,8 +98,11 @@ impl eframe::App for CalcApp {
                     heads,
                     headshot_type,
                     editing,
+                    retouch_level,
+                    extra_retouched_photos,
+                    days,
                 } => {
-                    ui_headshot(ui, heads, headshot_type, editing);
+                    ui_headshot(ui, heads, headshot_type, editing, retouch_level, extra_retouched_photos, days);
                 }
                 ShootType::Conference { hours } => {
                     ui_conference(ui, hours)
@@ -194,6 +200,9 @@ fn ui_headshot(
     heads: &mut u32,
     headshot_type: &mut HeadshotType,
     editing: &mut bool,
+    retouch_level: &mut RetouchLevel,
+    extra_retouched_photos: &mut u32,
+    days: &mut u32,
 ) {
     egui::ComboBox::from_label("Headshot type")
         .selected_text(headshot_type.to_string())
@@ -202,6 +211,24 @@ fn ui_headshot(
             ui.selectable_value(headshot_type, HeadshotType::Team, "Team");
             ui.selectable_value(headshot_type, HeadshotType::Small, "Small");
         });
+    
+    egui::ComboBox::from_label("Retouching type")
+        .selected_text(retouch_level.to_string())
+        .show_ui(ui, |ui| {
+            ui.selectable_value(retouch_level, RetouchLevel::Student, RetouchLevel::Student.to_string());
+            ui.selectable_value(retouch_level, RetouchLevel::Discount, RetouchLevel::Discount.to_string());
+            ui.selectable_value(retouch_level, RetouchLevel::Corporate, RetouchLevel::Corporate.to_string());
+            ui.selectable_value(retouch_level, RetouchLevel::Full, RetouchLevel::Full.to_string());
+        });
+
+    ui.horizontal(|ui| {
+        ui.add(DragValue::new(days));
+        if *days == 1 {
+            ui.label("day");
+        } else {
+            ui.label("days");
+        }
+    });
 
     ui.horizontal(|ui| {
         ui.add(DragValue::new(heads));
@@ -211,8 +238,17 @@ fn ui_headshot(
             ui.label("people");
         }
     });
+    
+    ui.horizontal(|ui| {
+        ui.add(DragValue::new(extra_retouched_photos));
+        if *extra_retouched_photos == 1 {
+            ui.label("additional retouched photo");
+        } else {
+            ui.label("additional retouched photos");
+        }
+    });
 
-    ui.checkbox(editing, "editing");
+    ui.checkbox(editing, "on site editing");
 
     //extra text
     ui.separator();

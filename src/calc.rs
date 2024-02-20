@@ -63,7 +63,10 @@ impl CalcApp {
                 heads,
                 headshot_type,
                 editing,
-            } => self.calc_headshot(*heads, headshot_type, *editing),
+                retouch_level,
+                extra_retouched_photos,
+                days,
+            } => self.calc_headshot(*heads, headshot_type, *editing, retouch_level, *extra_retouched_photos, *days),
             ShootType::Conference { hours } => self.calc_conference(*hours),
         }
     }
@@ -109,27 +112,23 @@ impl CalcApp {
             + self.expenses as f32 * EXPENSES_PRICE
     }
 
-    fn calc_headshot(&self, heads: u32, headshot_type: &HeadshotType, editing: bool) -> f32 {
+    fn calc_headshot(&self, heads: u32, headshot_type: &HeadshotType, editing: bool, retouch_level: &RetouchLevel, extra_retouched_photos: u32, days: u32) -> f32 {
         let main_price = match headshot_type {
             HeadshotType::Large => {
                 let hourly = calc_hours(heads) * (LARGE_HEADSHOT_HOURLY + (ASSISTANT_PRICE * 2.0));
-                let per_person = heads as f32
-                    * if heads > 10 {
-                        CHEAP_RETOUCH_PRICE
-                    } else {
-                        FANCY_RETOUCH_PRICE
-                    };
-
-                hourly + per_person + if editing { ON_SITE_EDITIING_PRICE } else { 0.0 }
+                let per_person = heads as f32 * retouch_level.get_price_per();
+                let extra_retouch = extra_retouched_photos as f32 * 20.0;
+                hourly + per_person + extra_retouch + if editing { ON_SITE_EDITIING_PRICE * days as f32 } else { 0.0 }
             }
             HeadshotType::Team => {
                 let hourly = calc_hours(heads) * (TEAM_HEADSHOT_HOURLY + ASSISTANT_PRICE);
-                let per_person = heads as f32 * CHEAP_RETOUCH_PRICE;
+                let per_person = heads as f32 * retouch_level.get_price_per();
+                let extra_retouch = extra_retouched_photos as f32 * 20.0;
 
-                hourly + per_person + if editing { ON_SITE_EDITIING_PRICE } else { 0.0 }
+                hourly + per_person + extra_retouch + if editing { ON_SITE_EDITIING_PRICE * days as f32 } else { 0.0 }
             }
             HeadshotType::Small => {
-                300.0 //wow very fancy system
+                400.0 //wow very fancy system
             }
         };
         main_price
@@ -168,7 +167,10 @@ pub enum ShootType {
     Headshot {
         heads: u32,
         headshot_type: HeadshotType,
+        retouch_level: RetouchLevel,
         editing: bool,
+        extra_retouched_photos: u32,
+        days: u32,
     },
     Conference{
         hours: f32,
@@ -252,18 +254,22 @@ impl Photographer {
         }
     }
 }
+
+#[derive(PartialEq)]
 pub enum RetouchLevel {
-    Volume,
-    Light,
-    Nice,
+    Student,
+    Discount,
+    Corporate,
+    Full,
 }
 
 impl RetouchLevel {
     pub fn get_price_per(&self) -> f32 {
         match self {
-            RetouchLevel::Volume => 5.0,
-            RetouchLevel::Light => 10.0,
-            RetouchLevel::Nice => 20.0,
+            RetouchLevel::Student => 5.0,
+            RetouchLevel::Discount => 10.0,
+            RetouchLevel::Corporate => 20.0,
+            RetouchLevel::Full => 50.0,
         }
     }
 }
@@ -271,19 +277,10 @@ impl RetouchLevel {
 impl Display for RetouchLevel {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            RetouchLevel::Volume => write!(f, "Volume"),
-            RetouchLevel::Light => write!(f, "Light"),
-            RetouchLevel::Nice => write!(f, "Nice"),
+            RetouchLevel::Student => write!(f, "Student ${}", self.get_price_per()),
+            RetouchLevel::Discount => write!(f, "Discount ${}", self.get_price_per()),
+            RetouchLevel::Corporate => write!(f, "Corporate/Under 20 People ${}", self.get_price_per()),
+            RetouchLevel::Full => write!(f, "Full Price/Special Needs ${}", self.get_price_per()),
         }
-    }
-}
-
-impl PartialEq for RetouchLevel {
-    fn eq(&self, other: &Self) -> bool {
-        matches!((self, other),
-            (RetouchLevel::Volume, RetouchLevel::Volume)
-            | (RetouchLevel::Light, RetouchLevel::Light)
-            | (RetouchLevel::Nice, RetouchLevel::Nice)
-        )
     }
 }
