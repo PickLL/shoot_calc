@@ -67,7 +67,7 @@ impl CalcApp {
                 extra_retouched_photos,
                 days,
             } => self.calc_headshot(*heads, headshot_type, *editing, retouch_level, *extra_retouched_photos, *days),
-            ShootType::Conference { hours } => self.calc_conference(*hours),
+            ShootType::Conference { hours, extra_cost } => self.calc_conference(*hours, *extra_cost),
         }
     }
 
@@ -136,10 +136,11 @@ impl CalcApp {
             + if self.drone { DRONE_PRICE } else { 0.0 }
     }
 
-    fn calc_conference(&self, hours: f32) -> f32{
+    fn calc_conference(&self, hours: f32, extra_cost: f32) -> f32{
         hours * CONFERENCE_HOURLY
         + if self.drone { DRONE_PRICE } else { 0.0 }
         + self.expenses as f32 * EXPENSES_PRICE
+        + extra_cost
     }
 }
 
@@ -174,6 +175,7 @@ pub enum ShootType {
     },
     Conference{
         hours: f32,
+        extra_cost: f32,
     }
 }
 #[derive(PartialEq)]

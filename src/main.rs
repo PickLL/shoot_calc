@@ -1,4 +1,3 @@
-use eframe::egui;
 use egui::*;
 
 mod calc;
@@ -61,7 +60,7 @@ impl eframe::App for CalcApp {
                     );
                     ui.selectable_value(
                         &mut self.shoot_type,
-                        ShootType::Conference { hours: 0.0 },
+                        ShootType::Conference { hours: 0.0 , extra_cost: 0.0},
                         "Conference",
                     );
                 });
@@ -104,8 +103,8 @@ impl eframe::App for CalcApp {
                 } => {
                     ui_headshot(ui, heads, headshot_type, editing, retouch_level, extra_retouched_photos, days);
                 }
-                ShootType::Conference { hours } => {
-                    ui_conference(ui, hours)
+                ShootType::Conference { hours , extra_cost} => {
+                    ui_conference(ui, hours, extra_cost)
                 }
             }
             if ui
@@ -306,13 +305,19 @@ fully trained HuthPhoto Team photographer";
 fn ui_conference(
     ui: &mut Ui,
     hours: &mut f32,
+    extra_cost: &mut f32,
 ) {
     ui.horizontal(|ui| {
-        ui.add(DragValue::new(hours));
-        if *hours == 0.0 {
+        ui.add(DragValue::new(hours).speed(0.1));
+        if *hours == 1.0 {
             ui.label("hour");
         } else {
             ui.label("hours");
         }
+    });
+    
+    ui.horizontal(|ui| {
+        ui.add(DragValue::new(extra_cost).speed(25.0));
+        ui.label("retouching / extra costs");
     });
 }
