@@ -19,10 +19,18 @@ const FANCY_RETOUCH_PRICE: f32 = 20.0;
 
 const CONFERENCE_HOURLY: f32 = 200.0;
 
+const TRAVEL_SHORT_HOURLY: f32 = 75.0;
+const TRAVEL_LONG_HOURLY: f32 = 50.0;
+
+const TRAVEL_PER_DIEM: f32 = 150.0;
+
 pub struct CalcApp {
     pub shoot_type: ShootType,
     pub expenses: u32,
     pub drone: bool,
+    pub travel_hours: u32,
+    pub travel_people: u32,
+    pub travel_days: u32,
 }
 
 impl CalcApp {
@@ -38,6 +46,22 @@ impl CalcApp {
             },
             expenses: 0,
             drone: false,
+            travel_hours: 0,
+            travel_days: 2,
+            travel_people: 1,
+        }
+    }
+
+    pub fn calc_travel(&self) -> f32{
+        if self.travel_hours == 0{
+            return 0.0;
+        }
+
+        if self.travel_hours <= 2{
+            return self.travel_hours as f32 * TRAVEL_SHORT_HOURLY;
+        } else{
+            return self.travel_hours as f32 * TRAVEL_LONG_HOURLY + 
+                TRAVEL_PER_DIEM * (self.travel_people * self.travel_days) as f32
         }
     }
 
@@ -89,6 +113,7 @@ impl CalcApp {
             + if self.drone { DRONE_PRICE} else { 0.0 }
             + assistant_hours * if use_higher_assistant_price {HIGHER_ASSISTANT_PRICE} else {ASSISTANT_PRICE}
             + self.expenses as f32 * EXPENSES_PRICE
+            + self.calc_travel()
     }
 
     fn calc_half_day(
@@ -110,6 +135,7 @@ impl CalcApp {
             + if self.drone { DRONE_PRICE } else { 0.0 }
             + assistant_hours * if use_higher_assistant_price {HIGHER_ASSISTANT_PRICE} else {ASSISTANT_PRICE}
             + self.expenses as f32 * EXPENSES_PRICE
+            + self.calc_travel()
     }
 
     fn calc_headshot(&self, heads: u32, headshot_type: &HeadshotType, editing: bool, retouch_level: &RetouchLevel, extra_retouched_photos: u32, days: u32) -> f32 {
@@ -134,6 +160,7 @@ impl CalcApp {
         main_price
             + self.expenses as f32 * EXPENSES_PRICE
             + if self.drone { DRONE_PRICE } else { 0.0 }
+            + self.calc_travel()
     }
 
     fn calc_conference(&self, hours: f32, extra_cost: f32) -> f32{
@@ -141,6 +168,7 @@ impl CalcApp {
         + if self.drone { DRONE_PRICE } else { 0.0 }
         + self.expenses as f32 * EXPENSES_PRICE
         + extra_cost
+        + self.calc_travel()
     }
 }
 

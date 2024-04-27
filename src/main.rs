@@ -4,6 +4,8 @@ mod calc;
 
 use calc::*;
 
+const MAX_RANGE: u32 = 1000;
+
 fn main() {
     let native_options = eframe::NativeOptions::default();
     eframe::run_native(
@@ -70,6 +72,33 @@ impl eframe::App for CalcApp {
             });
 
             ui.checkbox(&mut self.drone, "drone ($150)");
+
+            ui.horizontal(|ui| {
+                ui.add(DragValue::new(&mut self.travel_hours));
+                if self.travel_hours == 1 {
+                    ui.label("hour");
+                } else {
+                    ui.label("hours");
+                }
+            
+                if self.travel_hours > 2{
+                    ui.add(DragValue::new(&mut self.travel_days).clamp_range(2..=MAX_RANGE));
+                    if self.travel_days == 1 {
+                        ui.label("day");
+                    } else {
+                        ui.label("days");
+                    }
+                
+                    ui.add(DragValue::new(&mut self.travel_people));
+                    if self.travel_people == 1 {
+                        ui.label("person");
+                    } else {
+                        ui.label("people");
+                    }
+                }
+
+            });
+
             match &mut self.shoot_type {
                 ShootType::Hourly {
                     hours,
@@ -138,7 +167,7 @@ fn ui_hourly(
         });
     ui.horizontal(|ui| {
         ui.add(DragValue::new(hours));
-        if *hours == 0.0 {
+        if *hours == 1.0 {
             ui.label("hour");
         } else {
             ui.label("hours");
